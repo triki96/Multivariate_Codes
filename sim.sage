@@ -59,11 +59,20 @@ def SternComplexity(n,r,w):
 	
 
 #We create a random multivariate system
-max_degree = 2
-m = 3 # number of equations
-n = 10 # number of variables
+debug = True
+
+if debug:
+	m = 1 # number of equations
+	n = 5 # number of variables
+
+	set_random_seed(3)
+else:
+	m = 3 # number of equations
+	n = 10 # number of variables
+
 R = PolynomialRing(GF(2),'x', n) #Polynomial Ring
 S = []
+
 for i in range(m):
 	# Take random non-zero element r
 	r = R._random_nonzero_element(randrange(n+1), randrange(n+ n*(n-1)/2 +1))
@@ -83,12 +92,16 @@ for i in range(m):
 
 
 print("*"*50)
-print("Original system: \n", S)
+print("Original system: \n")
+[print(p, end=' = 0\n') for p in S]
 print("*"*50)
 
 
 # We compute quadr(S)
-S1 = [] #will contain the new (equiv) system, with all polynomials lowered down to deg 2
+S1 = [[] * m]	#Will contain the new (equiv) system, with all polynomials
+				#lowered down to deg 2, in m different lists (each containing
+				#the rearrangement of the i-th polynomial)
+
 for i in range(m):
 	poly = S[i]
 	newPoly = 0
@@ -104,61 +117,85 @@ for i in range(m):
 					f_tmp = R.gens()[-1] + R.gens()[nonzeroIndex[k]]*R.gens()[nonzeroIndex[k+1]]
 				else:
 					f_tmp = R.gens()[-1] + R.gens()[-2]*R.gens()[nonzeroIndex[k+1]]
-				S1.append(f_tmp)
+				S1[i].append(f_tmp)
 			newPoly += R.gens()[-1] * R.gens()[nonzeroIndex[-1]]
 		else:
 			newPoly += monomial 
-	S1.append(newPoly)
+	S1[i].append(newPoly)
 
 
-print("New system (deg 2): \n", S1)
+print("New system (deg 2): \n")
+for i in range(m):
+	[print(p, end=' = 0\n') for p in S1[i]]
 print("*"*50)
 
 
 #Now we have to focus on polynomials of degree 2 which are not of the form
 # xy + z = 0
-S2 = []
-for i in range(len(S1)): # we cycle over all polynomials
-	newPoly = 0
-	if (S1[i].degree() != 1):
-		monomials = S1[i].monomials()
-		numMonomials = len(monomials)
-		if (numMonomials > 2):
-			for j in range(numMonomials): #cycle over all monomials
-				if (monomials[j].degree() == 2):  # we just focus on deg 2
-					R = PolynomialRing(GF(2),'x', R.ngens()+1)
-					f_tmp = R.gens()[-1] + (monomials[j].variables())[0] * (monomials[j].variables())[1]
-					S2.append(f_tmp)
-					newPoly += R.gens()[-1]
-				else:
-					newPoly += monomials[j]
-		else:
-			newPoly += S1[i]
+S2 = [[] * m]
+
+for i in range(m):	#Cycle over the m groups of polynomials
+	S2[i] = S1[i][:-1]	#Copy all the polynomials in S1 of the form 'xy + z'
+
+	poly = S1[i][-1]	#Get the last one of each group, which by contruction
+						#is the only one (possibly) not of the form 'xy + z' 
+
+	if(poly.degree() == 1):
+		S2[i].append(poly)
+
 	else:
-		newPoly += S1[i]
-	S2.append(newPoly)
+		newPoly = 0
+
+		for mono in poly.monomials():
+			if(mono.degree() == 2):
+				R = PolynomialRing(GF(2),'x', R.ngens()+1)
+
+				x = mono.variables()[0]
+				y = mono.variables()[1]
+				z = R.gens()[-1]
+
+				S2[i].append(x*y + z)
+				newPoly += z
+
+			else:
+				newPoly += mono
+
+		S2[i].append(newPoly)
+
+print("New system (xy+z = 0): \n")
+for i in range(m):
+	[print(p, end=' = 0\n') for p in S2[i]]
+print("*"*50)
 
 
-print("New system: (xy+z = 0): \n", S2)
+"""
+# Removing overlapping variables in equations of the form "xy + z"
+S3 = []
+
+for i in range(len(S2)):
+	pass
+
+print("New system (non-overlapping): \n")
+[print(p, end=' = 0\n') for p in S3]
 print("*"*50)
 
 
 #Now we work on linear polynomials such as f := x0 + x2 + x9 + 1 and we transform
 #them according to the MPS paper
-S3 = []
-for i in range(len(S2)): # cycle over all polynomials
-	f_tmp = S2[i] # this will be added to S3
-	if (S2[i].degree() != 1): # we focus on deg 1 polynomials
-		S3.append(f_tmp)
+S4 = []
+for i in range(len(S3)): # cycle over all polynomials
+	f_tmp = S3[i] # this will be added to S4
+	if (S3[i].degree() != 1): # we focus on deg 1 polynomials
+		S4.append(f_tmp)
 	else:
-		numMonomials =  len(S2[i].exponents())
+		numMonomials =  len(S3[i].exponents())
 		if (numMonomials <= 3): # in particular we focus on linear polynomials with more that 3 monomials
-			S3.append(f_tmp)
+			S4.append(f_tmp)
 		else:
-			if (S2[i].constant_coefficient() == 1): #see if the polynomial contains +1
+			if (S3[i].constant_coefficient() == 1): #see if the polynomial contains +1
 				#print(S[i], " - caso in cui il polinomio contiene il termine noto")
 				if (numMonomials > 4):
-					variables = S2[i].variables()
+					variables = S3[i].variables()
 					d = len(variables)
 					for k in range(d-2):
 					# we need d-2 new variables
@@ -169,12 +206,12 @@ for i in range(len(S2)): # cycle over all polynomials
 							f_tmp = R.gens()[-1] + variables[k+1] + 1
 						else:
 							f_tmp = R.gens()[-1] + R.gens()[-2] + variables[k+1]
-						S3.append(f_tmp)
+						S4.append(f_tmp)
 				else:
-					S3.append(f_tmp)
+					S4.append(f_tmp)
 			else:
-				#print(S2[i], " - caso in cui il polinomio NON contiene il termine noto")
-				variables = S2[i].variables()
+				#print(S3[i], " - caso in cui il polinomio NON contiene il termine noto")
+				variables = S3[i].variables()
 				d = len(variables)
 				for k in range(d-2):
 				# we need d-2 new variables
@@ -186,10 +223,11 @@ for i in range(len(S2)): # cycle over all polynomials
 					else:
 						R = PolynomialRing(GF(2),'x', R.ngens()+1)
 						f_tmp = R.gens()[-1] + R.gens()[-2] + variables[k+1]
-					S3.append(f_tmp)
+					S4.append(f_tmp)
 				
 
-print("New system (linear fix): \n", S3)
+print("New system (linear fix): \n")
+[print(p, end=' = 0\n') for p in S4]
 print("*"*50)
 
 
@@ -199,8 +237,8 @@ print("*"*50)
 
 
 #We count the number of equation we ended up with
-q = len([i for i in S3 if i.degree() > 1]) #number of quadratic equations
-l = len(S3) - q #number of linear equations
+q = len([i for i in S4 if i.degree() > 1]) #number of quadratic equations
+l = len(S4) - q #number of linear equations
 n = 10 * q
 r = 7 * q - l
 w = 3 * q
@@ -212,3 +250,4 @@ print("*"*50)
 best_S, best_p, best_ell = SternComplexity(n,r,w)
 print("Complexity with Stern: ( p =",best_p,", l = ",best_ell,"):", ceil(best_S), "security bit")
 print("*"*50)
+"""
