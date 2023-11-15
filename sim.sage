@@ -90,7 +90,6 @@ for i in range(m):
 		r_toAppend += newMonomial
 	S.append(r_toAppend)
 
-
 print("*"*50)
 print("Original system: \n")
 [print(p, end=' = 0\n') for p in S]
@@ -122,7 +121,6 @@ for i in range(m):
 		else:
 			newPoly += monomial 
 	S1[i].append(newPoly)
-
 
 print("New system (deg 2): \n")
 for i in range(m):
@@ -168,18 +166,48 @@ for i in range(m):
 print("*"*50)
 
 
-"""
 # Removing overlapping variables in equations of the form "xy + z"
-S3 = []
+S3 = [[] * m]
 
-for i in range(len(S2)):
-	pass
+for i in range(m):	#Cycle over the m groups of polynomials
+	S3[i] = S2[i][:-1]	#Copy all the polynomials in S1 of the form 'xy + z'
+
+	V = set()			#Set of variables appearing S2[i]
+
+	# Cycle over the polynomials of the form 'xy + z'
+	for j in range(len(S2[i][:-1])):
+		var = S2[i][j].variables()
+
+		for x in var:
+			# Check whether a var was already seen, eventually substituting it
+
+			if(x in V):
+				R = PolynomialRing(GF(2),'x', R.ngens()+1)
+
+				x_1 = R.gens()[-1]
+				
+				# Substitute x with x_1
+				if(var == S3[i][j].variables()):
+					S3[i][j] = S3[i][j].subs({x : x_1})	
+				else:
+					temp = S3[i][j].variables()[0]			#temp == x
+					#print(f'Test: {temp==x}')
+					S3[i][j] = S3[i][j].subs({temp : x_1})
+
+				# Add the new relation
+				S3[i].append(x + x_1)				
+			else:
+				V.add(x)
+
+	S3[i].append(S2[i][-1])	#Add the linear polynomial
 
 print("New system (non-overlapping): \n")
-[print(p, end=' = 0\n') for p in S3]
+for i in range(m):
+	[print(p, end=' = 0\n') for p in S3[i]]
 print("*"*50)
 
 
+"""
 #Now we work on linear polynomials such as f := x0 + x2 + x9 + 1 and we transform
 #them according to the MPS paper
 S4 = []
