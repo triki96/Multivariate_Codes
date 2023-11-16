@@ -59,7 +59,7 @@ def SternComplexity(n,r,w):
 	
 
 #We create a random multivariate system
-debug = True
+debug = False
 
 if debug:
 	m = 1 # number of equations
@@ -92,7 +92,7 @@ for i in range(m):
 
 print("*"*50)
 print("Original system: \n")
-[print(p, end=' = 0\n') for p in S]
+tmp = [print(p, end=' = 0\n') for p in S]
 print("*"*50)
 
 
@@ -124,7 +124,7 @@ for i in range(m):
 
 print("New system (deg 2): \n")
 for i in range(m):
-	[print(p, end=' = 0\n') for p in S1[i]]
+	tmp = [print(p, end=' = 0\n') for p in S1[i]]
 print("*"*50)
 
 
@@ -162,7 +162,7 @@ for i in range(m):	#Cycle over the m groups of polynomials
 
 print("New system (xy+z = 0): \n")
 for i in range(m):
-	[print(p, end=' = 0\n') for p in S2[i]]
+	tmp = [print(p, end=' = 0\n') for p in S2[i]]
 print("*"*50)
 
 
@@ -203,7 +203,7 @@ for i in range(m):	#Cycle over the m groups of polynomials
 
 print("New system (non-overlapping): \n")
 for i in range(m):
-	[print(p, end=' = 0\n') for p in S3[i]]
+	tmp = [print(p, end=' = 0\n') for p in S3[i]]
 print("*"*50)
 
 
@@ -241,7 +241,7 @@ for i in range(m):	#Cycle over the m groups of polynomials
 
 print("New system (linear fix): \n")
 for i in range(m):
-	[print(p, end=' = 0\n') for p in S4[i]]
+	tmp = [print(p, end=' = 0\n') for p in S4[i]]
 print("*"*50)
 
 
