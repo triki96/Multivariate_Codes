@@ -65,7 +65,7 @@ if debug:
 	m = 1 # number of equations
 	n = 5 # number of variables
 
-	set_random_seed(3)
+	set_random_seed(0)
 else:
 	m = 3 # number of equations
 	n = 10 # number of variables
@@ -128,7 +128,7 @@ for i in range(m):
 print("*"*50)
 
 
-#Now we have to focus on polynomials of degree 2 which are not of the form
+# Now we have to focus on polynomials of degree 2 which are not of the form
 # xy + z = 0
 S2 = [[] * m]
 
@@ -170,7 +170,7 @@ print("*"*50)
 S3 = [[] * m]
 
 for i in range(m):	#Cycle over the m groups of polynomials
-	S3[i] = S2[i][:-1]	#Copy all the polynomials in S1 of the form 'xy + z'
+	S3[i] = S2[i][:-1]	#Copy all the polynomials in S2 of the form 'xy + z'
 
 	V = set()			#Set of variables appearing S2[i]
 
@@ -207,55 +207,41 @@ for i in range(m):
 print("*"*50)
 
 
-"""
-#Now we work on linear polynomials such as f := x0 + x2 + x9 + 1 and we transform
-#them according to the MPS paper
-S4 = []
-for i in range(len(S3)): # cycle over all polynomials
-	f_tmp = S3[i] # this will be added to S4
-	if (S3[i].degree() != 1): # we focus on deg 1 polynomials
-		S4.append(f_tmp)
+# Now we work on linear polynomials such as f := x0 + x2 + x9 + 1 and we
+# transform them according to the MPS paper
+
+S4 = [[] * m]
+
+for i in range(m):	#Cycle over the m groups of polynomials
+	S4[i] = S3[i][:-1]	#Copy all the polynomials of the form 'xy + z' and
+						#'x + y'
+
+	poly = S3[i][-1]	#Consider the other linear polynomial
+
+	# Check whether poly is already in the desired form 'x + y + z + delta'
+	var = poly.variables()	#Variables in poly
+	d = len(var)			#NB: d = number of non-constant monomials
+	
+	if(d <= 3):
+		S4[i].append(poly)
 	else:
-		numMonomials =  len(S3[i].exponents())
-		if (numMonomials <= 3): # in particular we focus on linear polynomials with more that 3 monomials
-			S4.append(f_tmp)
-		else:
-			if (S3[i].constant_coefficient() == 1): #see if the polynomial contains +1
-				#print(S[i], " - caso in cui il polinomio contiene il termine noto")
-				if (numMonomials > 4):
-					variables = S3[i].variables()
-					d = len(variables)
-					for k in range(d-2):
-					# we need d-2 new variables
-						R = PolynomialRing(GF(2),'x', R.ngens()+1)
-						if (k == 0):
-							f_tmp = R.gens()[-1] + variables[0] + variables[1]
-						elif (k == d-3):
-							f_tmp = R.gens()[-1] + variables[k+1] + 1
-						else:
-							f_tmp = R.gens()[-1] + R.gens()[-2] + variables[k+1]
-						S4.append(f_tmp)
-				else:
-					S4.append(f_tmp)
+		for k in range(d-2):	#We need d-2 new variables
+			if(k == 0):
+				R = PolynomialRing(GF(2), 'x', R.ngens()+1)
+
+				f = var[0] + var[1] + R.gens()[-1]			#= x_0 + x_1 + y_0
+			elif(k == d-3):
+				f = R.gens()[-1] + var[d-2] + var[d-1]		#= y_{d-3} + x_{d-2} + x_{d-1}
 			else:
-				#print(S3[i], " - caso in cui il polinomio NON contiene il termine noto")
-				variables = S3[i].variables()
-				d = len(variables)
-				for k in range(d-2):
-				# we need d-2 new variables
-					if (k == 0):
-						R = PolynomialRing(GF(2),'x', R.ngens()+1)
-						f_tmp = R.gens()[-1] + variables[0] + variables[1]
-					elif (k == d-3):
-						f_tmp = R.gens()[-1] + variables[k+1] + variables[k+2]
-					else:
-						R = PolynomialRing(GF(2),'x', R.ngens()+1)
-						f_tmp = R.gens()[-1] + R.gens()[-2] + variables[k+1]
-					S4.append(f_tmp)
-				
+				R = PolynomialRing(GF(2), 'x', R.ngens()+1)
+
+				f = R.gens()[-2] + var[k+1] + R.gens()[-1]	#= y_{k-1} + x_{k+1} + y_k
+			
+			S4[i].append(f)
 
 print("New system (linear fix): \n")
-[print(p, end=' = 0\n') for p in S4]
+for i in range(m):
+	[print(p, end=' = 0\n') for p in S4[i]]
 print("*"*50)
 
 
@@ -263,7 +249,7 @@ print("*"*50)
 #------------------------------Complexity Estimates------------------------------#
 ##################################################################################
 
-
+'''
 #We count the number of equation we ended up with
 q = len([i for i in S4 if i.degree() > 1]) #number of quadratic equations
 l = len(S4) - q #number of linear equations
@@ -278,4 +264,4 @@ print("*"*50)
 best_S, best_p, best_ell = SternComplexity(n,r,w)
 print("Complexity with Stern: ( p =",best_p,", l = ",best_ell,"):", ceil(best_S), "security bit")
 print("*"*50)
-"""
+'''
