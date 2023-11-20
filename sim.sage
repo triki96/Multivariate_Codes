@@ -4,6 +4,9 @@ from traceback import print_tb
 from sage.all import *
 
 
+###############################################################################
+################################ Miscellaneous ################################
+
 # description: characteristic function of x
 # input: x
 # output: {0,1}
@@ -58,11 +61,13 @@ def SternComplexity(n,r,w):
 	return (best_S, best_p, best_ell)
 	
 
+###############################################################################
+
 #We create a random multivariate system
-debug = False
+debug = True
 
 if debug:
-	m = 2 # number of equations
+	m = 1 # number of equations
 	n = 5 # number of variables
 
 	set_random_seed(3)
@@ -107,11 +112,11 @@ for i in range(m):
 	newPoly = 0
 
 	for monomial in poly.monomials():
-		if (monomial.degree() > 2):
+		if (monomial.degree() >= 2):
 			nonzeroIndex = [index for index, value in enumerate(monomial.exponents()[0]) if value != 0]
 			d = len(nonzeroIndex)
 		
-			for k in range(d-2):	#We need d-2 new variables
+			for k in range(d-1):	#We need d-2 new variables
 				R = PolynomialRing(GF(2), 'x', R.ngens()+1)
 		
 				if (k == 0):
@@ -122,7 +127,7 @@ for i in range(m):
 		
 				S1[i].append(f_tmp)
 		
-			newPoly += R.gens()[-1] * R.gens()[nonzeroIndex[-1]]
+			newPoly += R.gens()[-1] #* R.gens()[nonzeroIndex[-1]]
 		
 		else:
 			newPoly += monomial 
@@ -135,56 +140,16 @@ for i in range(m):
 print("*"*50)
 
 
-# Now we have to focus on polynomials of degree 2 which are not of the form
-# xy + z = 0
+# Removing overlapping variables in equations of the form "xy + z"
 S2 = [[] for i in range(m)]
+V = set()					#Set of variables appearing S1
 
 for i in range(m):	#Cycle over the m groups of polynomials
 	S2[i] = S1[i][:-1]	#Copy all the polynomials in S1 of the form 'xy + z'
-	
-	poly = S1[i][-1]	#Get the last one of each group, which by contruction
-						#is the only one (possibly) not of the form 'xy + z' 
-
-	if(poly.degree() == 1):
-		S2[i].append(poly)
-
-	else:
-		newPoly = 0
-
-		for mono in poly.monomials():
-			if(mono.degree() == 2):
-				R = PolynomialRing(GF(2),'x', R.ngens()+1)
-
-				x = mono.variables()[0]
-				y = mono.variables()[1]
-				z = R.gens()[-1]
-
-				S2[i].append(x*y + z)
-				newPoly += z
-
-			else:
-				newPoly += mono
-
-		S2[i].append(newPoly)
-
-	#print(f'S2 = {S2}')
-
-print("New system (xy+z = 0): \n")
-for i in range(m):	
-	[print(p, end=' = 0\n') for p in S2[i]]
-print("*"*50)
-
-
-# Removing overlapping variables in equations of the form "xy + z"
-S3 = [[] for i in range(m)]
-V = set()					#Set of variables appearing S2
-
-for i in range(m):	#Cycle over the m groups of polynomials
-	S3[i] = S2[i][:-1]	#Copy all the polynomials in S2 of the form 'xy + z'
 
 	# Cycle over the polynomials of the form 'xy + z'
-	for j in range(len(S2[i][:-1])):
-		var = S2[i][j].variables()
+	for j in range(len(S1[i][:-1])):
+		var = S1[i][j].variables()
 
 		for x in var:
 			# Check whether a var was already seen, eventually substituting it
@@ -195,44 +160,44 @@ for i in range(m):	#Cycle over the m groups of polynomials
 				x_1 = R.gens()[-1]
 				
 				# Substitute x with x_1
-				if(var == S3[i][j].variables()):
-					S3[i][j] = S3[i][j].subs({x : x_1})	
+				if(var == S2[i][j].variables()):
+					S2[i][j] = S2[i][j].subs({x : x_1})	
 				else:
-					temp = S3[i][j].variables()[0]			#temp == x
+					temp = S2[i][j].variables()[0]			#temp == x
 					#print(f'Test: {temp==x}')
-					S3[i][j] = S3[i][j].subs({temp : x_1})
+					S2[i][j] = S2[i][j].subs({temp : x_1})
 
 				# Add the new relation
-				S3[i].append(x + x_1)
+				S2[i].append(x + x_1)
 
 			else:
 				V.add(x)
 
-	S3[i].append(S2[i][-1])	#Add the linear polynomial
+	S2[i].append(S1[i][-1])	#Add the linear polynomial
 
 print("New system (non-overlapping): \n")
 for i in range(m):
-	[print(p, end=' = 0\n') for p in S3[i]]
+	[print(p, end=' = 0\n') for p in S2[i]]
 print("*"*50)
 
 
 # Now we work on linear polynomials such as f := x0 + x2 + x9 + 1 and we
 # transform them according to the MPS paper
 
-S4 = [[] for i in range(m)]
+S3 = [[] for i in range(m)]
 
 for i in range(m):	#Cycle over the m groups of polynomials
-	S4[i] = S3[i][:-1]	#Copy all the polynomials of the form 'xy + z' and
+	S3[i] = S2[i][:-1]	#Copy all the polynomials of the form 'xy + z' and
 						#'x + y'
 
-	poly = S3[i][-1]	#Consider the other linear polynomial
+	poly = S2[i][-1]	#Consider the other linear polynomial
 
 	# Check whether poly is already in the desired form 'x + y + z + delta'
 	var = poly.variables()	#Variables in poly
 	d = len(var)			#NB: d = number of non-constant monomials
 	
 	if(d <= 3):
-		S4[i].append(poly)
+		S3[i].append(poly)
 	else:
 		for k in range(d-2):	#We need d-2 new variables
 			if(k == 0):
@@ -248,11 +213,11 @@ for i in range(m):	#Cycle over the m groups of polynomials
 
 				f = R.gens()[-2] + var[k+1] + R.gens()[-1]	#= y_{k-1} + x_{k+1} + y_k
 			
-			S4[i].append(f)
+			S3[i].append(f)
 
 print("New system (linear fix): \n")
 for i in range(m):
-	[print(p, end=' = 0\n') for p in S4[i]]
+	[print(p, end=' = 0\n') for p in S3[i]]
 print("*"*50)
 
 
@@ -266,10 +231,10 @@ q = 0 	#Number of quadratic equations
 l = 0 	#Number of linear equations
 
 for i in range(m):
-	temp = len([p for p in S4[i] if p.degree() > 1])
+	temp = len([p for p in S3[i] if p.degree() > 1])
 	
 	q += temp
-	l += len(S4[i]) - temp
+	l += len(S3[i]) - temp
 
 n = 10 * q
 r = 7 * q - l
