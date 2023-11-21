@@ -69,7 +69,7 @@ for i in range(m):
 	l += len(S3[i]) - temp
 
 n = 10 * q
-r = 7 * q - l
+r = 7 * q + l
 w = 3 * q
 
 best_LB, best_p = LeeBrickelComplexity(n,r,w)
