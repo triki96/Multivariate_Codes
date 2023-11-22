@@ -2,6 +2,7 @@ reset()
 from random import randrange
 from traceback import print_tb
 from sage.all import *
+import numpy as np 
 load_attach_path('./utils/')
 load('ISD_utils.sage')
 load('multivariate_utils.sage')
@@ -45,7 +46,8 @@ print("*"*50)
 # Now we work on linear polynomials such as f := x0 + x2 + x9 + 1 and we
 # transform them according to the MPS paper
 
-R, S3 = linearFix(R,S2,m)
+# R, S3 = linearFix(R,S2,m)
+S3 = S2
 
 print("New system (linear fix): \n")
 for i in range(m):
@@ -54,7 +56,7 @@ print("*"*50)
 
 
 ##################################################################################
-#------------------------------Complexity Estimates------------------------------#
+#------------------------------Creating The Matrix-------------------------------#
 ##################################################################################
 
 #We count the number of equation we ended up with
@@ -64,13 +66,46 @@ l = 0 	#Number of linear equations
 
 for i in range(m):
 	temp = len([p for p in S3[i] if p.degree() > 1])
-	
 	q += temp
 	l += len(S3[i]) - temp
+
+#G_tmp = matrix([[1,0,0,1,1,0,0,1,1,1],[0,1,0,0,0,1,1,1,1,1],[0,0,1,1,1,1,1,1,1,1]])
+H_tmp = matrix([[1,0,1],[1,0,1],[0,1,1],[0,1,1],[1,1,1],[1,1,1],[1,1,1]])
+H_tmp = block_matrix([[H_tmp, 1]]) 
+
+H = H_tmp
+for i in range(q-1):
+	H = block_diagonal_matrix(H, H_tmp)
+
+M_tmp = matrix([[1,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0,0]])
+M = M_tmp
+for i in range(q-1):
+	M = block_diagonal_matrix(M, M_tmp)
+
+for i in range(m):
+	temp = [p for p in S3[i] if p.degree() == 1] # prendo solo i polinomi lineari
+	for j in range(len(temp)):
+		# creo un vettorel lungo n con 1 sui coeff giusti e lo aggiungo alla matrice
+		polyToAdd = sum(vector(v) for v in temp[j].exponents())
+		padLength = len(R.gens()) - len(polyToAdd) # padding fino a H.nrows
+		polyToAdd = vector(np.pad(polyToAdd, (0, padLength), 'constant'))
+		polyToAdd = polyToAdd * M
+		H = H.insert_row(H.nrows(),polyToAdd)
+		
+# H è la matrice di parità sulla quale vogliamo fare ISD
+
+		
+##################################################################################
+#------------------------------Complexity Estimates------------------------------#
+##################################################################################
+
 
 n = 10 * q
 r = 7 * q + l
 w = 3 * q
+
+#print('rank check: ',H.rank(), '=?=', r, "\n") # controllo se il rango è diminuito
+
 
 best_LB, best_p = LeeBrickelComplexity(n,r,w)
 print("Complexity with Lee&Brickell ( p =",best_p,"): ", ceil(best_LB), "security bit")

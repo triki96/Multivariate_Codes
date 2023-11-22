@@ -14,22 +14,21 @@ def createSystem(R,n,m):
 	for i in range(m):
 		# Take random non-zero element r
 		r = R._random_nonzero_element(randrange(n+1), randrange(n+ n*(n-1)/2 +1))
+		while (r.degree() == 0):
+			r = R._random_nonzero_element(randrange(n+1), randrange(n+ n*(n-1)/2 +1))
 		#r = R._random_nonzero_element(2, randrange(n+ n*(n-1)/2 +1))
 		# In the following lines: set all nonzero coeff to 1
 		# (the problem is that r could be of the form x0^2*x1, which does not make sense in F2)
-		if (r.degree() > 0):
-			r_toAppend = 0
-			for j in range(len(r.monomials())):
-				monomial = r.monomials()[j]
-				exponents = zero_vector(n)
-				for k in range(n):
-					if (monomial.exponents()[0][k] > 0):
-						exponents[k] = 1
-				newMonomial = prod(var**(ch(exp)) for var, exp in zip(R.gens(), exponents))
-				r_toAppend += newMonomial
-			S.append(r_toAppend)
-		else: 
-			i = i-1
+		r_toAppend = 0
+		for j in range(len(r.monomials())):
+			monomial = r.monomials()[j]
+			exponents = zero_vector(n)
+			for k in range(n):
+				if (monomial.exponents()[0][k] > 0):
+					exponents[k] = 1
+			newMonomial = prod(var**(ch(exp)) for var, exp in zip(R.gens(), exponents))
+			r_toAppend += newMonomial
+		S.append(r_toAppend)
 	return S
 
 
