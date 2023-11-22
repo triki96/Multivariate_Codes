@@ -115,6 +115,43 @@ def linearFix(R, S2, m):
 	return R, S3
 
 
+
+def createMatrixCode(S3):
+	#We count the number of equation we ended up with
+	m = len(S3)
+	q = 0 	#Number of quadratic equations
+	l = 0 	#Number of linear equations
+
+	for i in range(m):
+		temp = len([p for p in S3[i] if p.degree() > 1])
+		q += temp
+		l += len(S3[i]) - temp
+
+	H_tmp = matrix([[1,0,1],[1,0,1],[0,1,1],[0,1,1],[1,1,1],[1,1,1],[1,1,1]])
+	H_tmp = block_matrix([[H_tmp, 1]])
+
+	H = H_tmp
+	for i in range(q-1):
+		H = block_diagonal_matrix(H, H_tmp)
+
+	M_tmp = matrix([[1,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0,0]])
+	M = M_tmp
+	for i in range(q-1):
+		M = block_diagonal_matrix(M, M_tmp)
+
+	for i in range(m):
+		temp = [p for p in S3[i] if p.degree() == 1] # prendo solo i polinomi lineari
+		for j in range(len(temp)):
+			# creo un vettorel lungo n con 1 sui coeff giusti e lo aggiungo alla matrice
+			polyToAdd = sum(vector(v) for v in temp[j].exponents())
+			padLength = len(R.gens()) - len(polyToAdd) # padding fino a H.nrows
+			polyToAdd = vector(np.pad(polyToAdd, (0, padLength), 'constant'))
+			polyToAdd = polyToAdd * M
+			H = H.insert_row(H.nrows(),polyToAdd)
+	return H,q
+
+
+
 def printSystem(S):
 	[print(p, end=' = 0\n') for p in S]
 	print("*"*50)

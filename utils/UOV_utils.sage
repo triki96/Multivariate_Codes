@@ -5,7 +5,7 @@ from sage.all import *
 
 def generateUOVPK(q,m,n,v,o):
 	R = PolynomialRing(GF(q),'x', n) #Polynomial Ring
-	
+
 	# S is the private UOV key
 	F = []
 	for k in range(m):
@@ -24,7 +24,7 @@ def generateUOVPK(q,m,n,v,o):
 	# T is the set of affine trasformations
 	T = []
 	for k in range(n):
-		r = R._random_nonzero_element(1, randrange(n+ n*(n-1)/2 +1))
+		r = R._random_nonzero_element(1, randrange(n+1))
 		T.append(r)
 
 	#Masked system
