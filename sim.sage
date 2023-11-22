@@ -3,9 +3,13 @@ from random import randrange
 from traceback import print_tb
 from sage.all import *
 import numpy as np
+
 load_attach_path('./utils/')
 load('ISD_utils.sage')
 load('multivariate_utils.sage')
+load('LB_utils.sage') # needed for Stern ISD
+load('list_sorting_utils.sage') # needed for Stern ISD
+load('stern_utils.sage') # needed for ISD
 
 
 
