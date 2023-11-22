@@ -26,14 +26,14 @@ numTests = 1001
 
 for i in range(numTests):
 	print("new try: ", i)
-	try: 
-		alarm(60) # due minuti di tempo massimo 
+	try:
+		alarm(60) # due minuti di tempo massimo
 		R = PolynomialRing(GF(2),'x', n) #Polynomial Ring
 		S = createSystem(R,n,m) # Create random system
 		R, S1 = quadr(R,S,m) # Put system in quadr form
 		R, S2 = removeOverlap(R, S1, m) # remove overlapping variables
 		S3 = S2 # We don't fix the linear part
-		H,q = createMatrixCode(S3) # Create The Matrix 
+		H,q = createMatrixCode(S3) # Create The Matrix
 		#-Complexity Estimates-#
 		nn = H.ncols()
 		rr = H.rank() #r = 7 * q + l
@@ -47,22 +47,22 @@ for i in range(numTests):
 		#print(i,"-randomCounter: ", complexityCounterRandom)
 		if (i % 100 == 0):
 			print(i,"-randomCounter: ", complexityCounterRandom)
-	except (AlarmInterrupt): 
+	except (AlarmInterrupt):
 		print("Didnt manage")
 		cancel_alarm()
-		i = i-1 # retry with new system 
-	else: 
+		i = i-1 # retry with new system
+	else:
 		print("OK")
 		cancel_alarm()
-	
 
-	
+
+
 
 
 
 for i in range(numTests):
-	try: 
-		alarm(60) # due minuti di tempo massimo 
+	try:
+		alarm(60) # due minuti di tempo massimo
 		R = PolynomialRing(GF(2),'x', n) #Polynomial Ring
 		S = generateUOVPK(2,m,n,v,o)
 		R, S1 = quadr(R,S,m) # Put system in quadr form
@@ -82,11 +82,8 @@ for i in range(numTests):
 		complexityCounterUOV[best_S] += 1
 		if (i % 100 == 0):
 			print(i,"-randomCounter: ", complexityCounterUOV)
-	except (AlarmInterrupt): 
+	except (AlarmInterrupt):
 		cancel_alarm()
-		i = i-1 # retry with new system 
-	else: 
+		i = i-1 # retry with new system
+	else:
 		cancel_alarm()
-
-
-
