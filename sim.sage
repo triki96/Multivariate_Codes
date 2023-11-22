@@ -2,7 +2,7 @@ reset()
 from random import randrange
 from traceback import print_tb
 from sage.all import *
-import numpy as np 
+import numpy as np
 load_attach_path('./utils/')
 load('ISD_utils.sage')
 load('multivariate_utils.sage')
@@ -71,7 +71,7 @@ for i in range(m):
 
 #G_tmp = matrix([[1,0,0,1,1,0,0,1,1,1],[0,1,0,0,0,1,1,1,1,1],[0,0,1,1,1,1,1,1,1,1]])
 H_tmp = matrix([[1,0,1],[1,0,1],[0,1,1],[0,1,1],[1,1,1],[1,1,1],[1,1,1]])
-H_tmp = block_matrix([[H_tmp, 1]]) 
+H_tmp = block_matrix([[H_tmp, 1]])
 
 H = H_tmp
 for i in range(q-1):
@@ -91,10 +91,10 @@ for i in range(m):
 		polyToAdd = vector(np.pad(polyToAdd, (0, padLength), 'constant'))
 		polyToAdd = polyToAdd * M
 		H = H.insert_row(H.nrows(),polyToAdd)
-		
+
 # H è la matrice di parità sulla quale vogliamo fare ISD
 
-		
+
 ##################################################################################
 #------------------------------Complexity Estimates------------------------------#
 ##################################################################################
