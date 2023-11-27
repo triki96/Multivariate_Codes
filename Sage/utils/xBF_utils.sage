@@ -1,5 +1,6 @@
 
-
+def wt(x):
+	return len([i for i in x if i != 0])
 
 # ref: https://enac.hal.science/hal-02614017/document (pg.8)
 def xBF(H,s,n,k,w,w_e,tau,N):
@@ -15,16 +16,19 @@ def xBF(H,s,n,k,w,w_e,tau,N):
 				if (t[j] == 1 and H[j,i]==1):
 					count = count + 1
 				if count >= tau:
+					#print("count: ", count)
 					y[i] = 1
 		x = x + y
+		#print(x)
 		t = t + y * (H.transpose())
 		if (wt(t) < w_e or round > N):
 			break
+		round += 1
 	if (round <= N):
 		return (True,x,s-x*(H.transpose()))
 	# OSS: non è detto che il peso della soluzione sia w. (pseudocodice sbagliato)
 	else: 
-		return False, 0 ,0
+		return (False,x,s-x*(H.transpose()))
 	
 
 

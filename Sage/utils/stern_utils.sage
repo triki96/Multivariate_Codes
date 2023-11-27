@@ -29,11 +29,9 @@ def PGE(n,r,ell,Fq,H):
             tmp = H[r-1-i,:];
             H[r-1-i,:] = H[j,:];
             H[j,:] = tmp;
-
             #scale row so that you have the pivot
-            scale_coeff = H[r-1-i,n-1-i]^-1;
-            H[r-1-i,:] = scale_coeff*H[r-1-i,:];
-
+            #scale_coeff = H[r-1-i,n-1-i]^-1;
+            #H[r-1-i,:] = scale_coeff*H[r-1-i,:];
             #create zeros
             for v in range(r):
                 if v!= i:
@@ -136,13 +134,11 @@ def stern_isd(H, Fq, Fq_star, n, k, p, ell, w):
         new_H = H*P;
 
         ok, H_prime = PGE(n,n-k,ell,Fq,new_H);
-
     E = H_prime[0:ell, 0:k+ell];
 
     #Split the matrix E into submatrices
     E_left = E[:,0:floor((k+ell)/2)];
     E_right = E[:,floor((k+ell)/2):k+ell];
-
     #create lists for Stern
     list_all_vectors_left = enumerate_Hamming_sphere(Fq, Fq_star, floor((k+ell)/2), p);
     list_subsums_left = create_list_partial_sums(E_left, list_all_vectors_left, matrix(Fq,1,ell),1);

@@ -13,9 +13,9 @@ def createSystem(R,n,m):
 	S = []
 	for i in range(m):
 		# Take random non-zero element r
-		r = R._random_nonzero_element(randrange(n+1), randrange(n+ n*(n-1)/2 +1))
-		while (r == 1):
-			r = R._random_nonzerro_element(randrange(n+1), randrange(n+ n*(n-1)/2 +1))
+		r = R.random_element(randrange(n+1), randrange(n+ n*(n-1)/2 +1))
+		while (r == 1 or r == 0):
+			r = R.random_element(randrange(n+1), randrange(n+ n*(n-1)/2 +1))
 		#r = R._random_nonzero_element(2, randrange(n+ n*(n-1)/2 +1))
 		# In the following lines: set all nonzero coeff to 1
 		# (the problem is that r could be of the form x0^2*x1, which does not make sense in F2)
