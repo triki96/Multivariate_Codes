@@ -13,33 +13,6 @@ G_hat := Matrix(F, [[1, 0, 0, 1, 1, 0, 0, 1, 1, 1],
 e_hat := Vector(F, [0, 0, 0, 0, 0, 0, 0, 1, 1, 1]);
 
 
-/********************************** Utility **********************************/
-
-/*
-Applies the map tau: F^{10q} -> F^{3q} to a vector v_tilde = (v_1, ..., v_q).
-The function constructs a vector by taking the first 3 entries of each
-component v_i in v_tilde.
-Input:
-- v_tilde, vector of length 10q over F.
-*/
-function tau(v_tilde)
-	
-	q := NumberOfColumns(v_tilde) div 10;
-	v := ZeroMatrix(F, 1, 3*q);				//Output vector
-	
-	for i in [1..q] do
-		k1 := (i - 1)*10 + 1;					//1, 11, ..., 10q-9
-		k2 := (i - 1)*3 + 1;					//1, 4, ..., 3q-2
-
-		tmp := ColumnSubmatrix(v_tilde, k1, 3);	//tmp = v~[k1..k1+2]
-
-		InsertBlock(~v, tmp, 1, k2);
-	end for;
-
-	return v;
-end function;
-
-
 /********************************* Reduction *********************************/
 
 // Quadratic equations
@@ -171,4 +144,39 @@ function reduction2MLD(R, S)
 	t := t_tilde;
 
 	return H, s, t;
+end function;
+
+
+/********************************** Utility **********************************/
+
+/*
+Applies the map tau: F^{10q} -> F^{3q} to a vector v_tilde = (v_1, ..., v_q).
+The function constructs a vector by taking the first 3 entries of each
+component v_i in v_tilde.
+Input:
+- v_tilde, vector of length 10q over F.
+*/
+function tau(v_tilde)
+	
+	q := NumberOfColumns(v_tilde) div 10;
+	v := ZeroMatrix(F, 1, 3*q);				//Output vector
+	
+	for i in [1..q] do
+		k1 := (i - 1)*10 + 1;					//1, 11, ..., 10q-9
+		k2 := (i - 1)*3 + 1;					//1, 4, ..., 3q-2
+
+		tmp := ColumnSubmatrix(v_tilde, k1, 3);	//tmp = v~[k1..k1+2]
+
+		InsertBlock(~v, tmp, 1, k2);
+	end for;
+
+	return v;
+end function;
+
+/*
+*/
+function matrixSimplify(H, s)
+	M := HorizontalJoin(H, Transpose(s));
+
+	return Rank(M);
 end function;
